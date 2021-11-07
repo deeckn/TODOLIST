@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">TodoList</string>
+    <string name="todo_list">Todo-List</string>
+    <string name="title_description">Let\'s track activities and stay productive!</string>
+    <string name="tasks">Tasks</string>
+    <string name="task_description">Let\'s see what you have to do.</string>
+    <string name="action_button">actionButton</string>
+    <string name="new_task">New Task</string>
+    <string name="save">Save</string>
+</resources>
