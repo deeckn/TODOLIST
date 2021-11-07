@@ -4,9 +4,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
-
+import android.widget.Button;
+import android.widget.EditText;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.List;
@@ -37,10 +40,10 @@ public class MainActivity extends AppCompatActivity {
         actionButton = findViewById(R.id.action_button);
         taskRecyclerView = findViewById(R.id.tasks_recyclerview);
         taskRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        tasks = db.getAllTasks();
     }
 
     private void fillRecyclerView() {
+        tasks = db.getAllTasks();
         adapter = new TaskCardAdapter(tasks, this);
         taskRecyclerView.setAdapter(adapter);
     }
@@ -57,8 +60,33 @@ public class MainActivity extends AppCompatActivity {
         bottomSheetDialog.setContentView(bottomSheetView);
         bottomSheetDialog.show();
 
-        bottomSheetView.findViewById(R.id.confirm_button).setOnClickListener(v1 -> {
-            bottomSheetDialog.cancel();
+        EditText input = bottomSheetDialog.findViewById(R.id.input_task);
+        Button confirmButton = bottomSheetView.findViewById(R.id.confirm_button);
+
+        assert input != null;
+        input.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                confirmButton.setEnabled(count != 0);
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+            @Override
+            public void afterTextChanged(Editable s) { }
+        });
+
+        confirmButton.setOnClickListener(v1 -> {
+            try {
+                String text = input.getText().toString();
+                if (!text.equals("")) {
+                    db.addNewTask(new TaskModel(0, text, 0));
+                    bottomSheetDialog.cancel();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         });
     };
 }
