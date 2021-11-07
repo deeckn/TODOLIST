@@ -16,14 +16,10 @@ public class TaskCardAdapter extends RecyclerView.Adapter<TaskCardHolder> {
 
     private List<TaskModel> taskList;
     private final Context context;
-    DatabaseHelper db;
-    MainActivity activity;
 
-    public TaskCardAdapter(List<TaskModel> taskList, Context context, DatabaseHelper db, MainActivity activity) {
+    public TaskCardAdapter(List<TaskModel> taskList, Context context) {
         this.taskList = taskList;
         this.context = context;
-        this.db = db;
-        this.activity = activity;
     }
 
     @NonNull
@@ -40,6 +36,12 @@ public class TaskCardAdapter extends RecyclerView.Adapter<TaskCardHolder> {
         holder.checkBox.setTextSize(16);
         holder.checkBox.setTypeface(ResourcesCompat.getFont(context, R.font.poppins_semibold));
         holder.checkBox.setChecked(taskList.get(position).getStatus() == 1);
+
+        holder.checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            DatabaseHelper db = new DatabaseHelper(buttonView.getContext());
+            if (isChecked) db.updateStatus(taskList.get(position).getId(), 1);
+            else db.updateStatus(taskList.get(position).getId(), 0);
+        });
     }
 
     @Override
