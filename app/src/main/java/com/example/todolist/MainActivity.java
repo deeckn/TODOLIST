@@ -1,6 +1,8 @@
 package com.example.todolist;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.os.Bundle;
@@ -33,6 +35,9 @@ public class MainActivity extends AppCompatActivity {
 
         // Event Listener
         actionButton.setOnClickListener(openBottomSheet);
+
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
+        itemTouchHelper.attachToRecyclerView(taskRecyclerView);
     }
 
     private void initialize() {
@@ -80,13 +85,31 @@ public class MainActivity extends AppCompatActivity {
         confirmButton.setOnClickListener(v1 -> {
             try {
                 String text = input.getText().toString();
+                int count = tasks.size();
                 if (!text.equals("")) {
                     db.addNewTask(new TaskModel(0, text, 0));
+                    tasks = db.getAllTasks();
+                    adapter.setTaskList(tasks);
+                    adapter.notifyDataSetChanged();
                     bottomSheetDialog.cancel();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         });
+    };
+
+    ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(
+            ItemTouchHelper.UP | ItemTouchHelper.DOWN | ItemTouchHelper.START | ItemTouchHelper.END,
+            0) {
+        @Override
+        public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+            return false;
+        }
+
+        @Override
+        public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+
+        }
     };
 }
