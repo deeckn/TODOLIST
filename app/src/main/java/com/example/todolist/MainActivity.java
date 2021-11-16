@@ -8,8 +8,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -30,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
     RecyclerView taskRecyclerView;
     TaskCardAdapter adapter;
     List<TaskModel> tasks;
+    int COUNT;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,8 +55,13 @@ public class MainActivity extends AppCompatActivity {
 
     private void fillRecyclerView() {
         tasks = db.getAllTasks();
+        for (TaskModel t : tasks) {
+            System.out.println(t.getText() + " " + t.getPosition());
+        }
+        Collections.sort(tasks);
         adapter = new TaskCardAdapter(tasks, this);
         taskRecyclerView.setAdapter(adapter);
+        COUNT = tasks.size();
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -76,29 +80,19 @@ public class MainActivity extends AppCompatActivity {
         EditText input = bottomSheetDialog.findViewById(R.id.input_task);
         Button confirmButton = bottomSheetView.findViewById(R.id.confirm_button);
 
-        assert input != null;
-        input.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                confirmButton.setEnabled(count != 0);
-            }
-
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
-
-            @Override
-            public void afterTextChanged(Editable s) { }
-        });
-
         confirmButton.setOnClickListener(v1 -> {
             try {
+                assert input != null;
                 String text = input.getText().toString();
                 if (!text.equals("")) {
-                    db.addNewTask(new TaskModel(0, text, 0));
+                    db.addNewTask(new TaskModel(0, text, 0, ++COUNT));
                     tasks = db.getAllTasks();
                     adapter.setTaskList(tasks);
                     adapter.notifyDataSetChanged();
                     bottomSheetDialog.cancel();
+                }
+                else {
+                    Toast.makeText(this, "Field cannot be empty", Toast.LENGTH_SHORT).show();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -120,6 +114,14 @@ public class MainActivity extends AppCompatActivity {
             int toPosition = target.getAdapterPosition();
             Collections.swap(tasks, fromPosition, toPosition);
             Objects.requireNonNull(recyclerView.getAdapter()).notifyItemMoved(fromPosition, toPosition);
+
+            int i = 0;
+            for (TaskModel task : tasks) {
+                task.setPosition(i);
+                db.updatePosition(task.getId(), i);
+                i++;
+            }
+
             return false;
         }
 
@@ -161,21 +163,6 @@ public class MainActivity extends AppCompatActivity {
         assert input != null;
         input.setText(currentModel.getText());
 
-        input.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                confirmButton.setEnabled(count != 0);
-            }
-
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
-
-            @Override
-            public void afterTextChanged(Editable s) { }
-        });
-
-        confirmButton.setOnClickListener(v1 -> Toast.makeText(this, "Task Updated", Toast.LENGTH_SHORT).show());
-
         confirmButton.setOnClickListener(v1 -> {
             try {
                 String text = input.getText().toString();
@@ -184,6 +171,10 @@ public class MainActivity extends AppCompatActivity {
                     currentModel.setText(text);
                     adapter.notifyItemChanged(position);
                     bottomSheetDialog.cancel();
+                    Toast.makeText(this, "Task Updated", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    Toast.makeText(this, "Field cannot be empty", Toast.LENGTH_SHORT).show();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
