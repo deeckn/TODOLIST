@@ -52,4 +52,12 @@ public class TaskCardAdapter extends RecyclerView.Adapter<TaskCardHolder> {
     public void setTaskList(List<TaskModel> tasks) {
         this.taskList = tasks;
     }
+
+    public int getId(int position) {
+        return taskList.get(position).getId();
+    }
+
+    public TaskModel getModel(int position) {
+        return taskList.get(position);
+    }
 }
