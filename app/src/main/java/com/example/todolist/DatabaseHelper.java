@@ -16,6 +16,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COLUMN_ID = "ID";
     public static final String COLUMN_TEXT = "TEXT";
     public static final String COLUMN_STATUS = "STATUS";
+    public static final String COLUMN_POSITION = "POSITION";
 
     public DatabaseHelper(Context context) {
         super(context, DB_NAME, null, 1);
@@ -28,7 +29,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         TASKS_DATA + " (" +
                         COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                         COLUMN_TEXT + " TEXT, " +
-                        COLUMN_STATUS + " INTEGER)";
+                        COLUMN_STATUS + " INTEGER, " +
+                        COLUMN_POSITION + " INTEGER)";
         db.execSQL(createTableStatement);
     }
 
@@ -38,7 +40,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void addNewTask(TaskModel taskModel) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
-//        cv.put(COLUMN_ID, taskModel.getId());
         cv.put(COLUMN_TEXT, taskModel.getText());
         cv.put(COLUMN_STATUS, taskModel.getStatus());
         db.insert(TASKS_DATA, null, cv);
@@ -57,7 +58,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     int id = cursor.getInt(0);
                     String text = cursor.getString(1);
                     int status = cursor.getInt(2);
-                    TaskModel task = new TaskModel(id, text, status);
+                    int position = cursor.getInt(3);
+                    System.out.println("POSITION FROM DATABASE = " + position);
+                    TaskModel task = new TaskModel(id, text, status, position);
                     allTasks.add(task);
                 } while (cursor.moveToNext());
             }
@@ -76,6 +79,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         ContentValues cv = new ContentValues();
         cv.put(COLUMN_STATUS, status);
         db.update(TASKS_DATA, cv, COLUMN_ID + "=?", new String[] {String.valueOf(id)});
+        db.close();
     }
 
     public void updateTask(int id, String text) {
@@ -83,10 +87,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         ContentValues cv = new ContentValues();
         cv.put(COLUMN_TEXT, text);
         db.update(TASKS_DATA, cv, COLUMN_ID + "=?", new String[] {String.valueOf(id)});
+        db.close();
+    }
+
+    public void updatePosition(int id, int toPosition) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put(COLUMN_POSITION, toPosition);
+        db.update(TASKS_DATA, cv, COLUMN_ID + "=?", new String[] {String.valueOf(id)});
+        db.close();
     }
 
     public void deleteTask(int id) {
         SQLiteDatabase db = this.getReadableDatabase();
         db.delete(TASKS_DATA, COLUMN_ID + "=?", new String[] {String.valueOf(id)});
+        db.close();
+    }
+
+    public void clearDatabase() {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TASKS_DATA, null, null);
+        db.close();
     }
 }
