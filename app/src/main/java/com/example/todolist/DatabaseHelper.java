@@ -11,17 +11,22 @@ import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
+    // DATABASE NAME
     public static final String DB_NAME = "todolist.sqlite";
-    public static final String TASKS_DATA = "TASKS_DATA";
-    public static final String COLUMN_ID = "ID";
-    public static final String COLUMN_TEXT = "TEXT";
-    public static final String COLUMN_STATUS = "STATUS";
-    public static final String COLUMN_POSITION = "POSITION";
 
+    // TASK_DATA TABLE COLUMNS
+    private static final String TASKS_DATA = "TASKS_DATA";
+    private static final String COLUMN_ID = "ID";
+    private static final String COLUMN_TEXT = "TEXT";
+    private static final String COLUMN_STATUS = "STATUS";
+    private static final String COLUMN_POSITION = "POSITION";
+
+    // CONSTRUCTOR
     public DatabaseHelper(Context context) {
         super(context, DB_NAME, null, 1);
     }
 
+    // DATABASE CREATION
     @Override
     public void onCreate(SQLiteDatabase db) {
         String createTableStatement =
@@ -37,15 +42,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {}
 
+    // Adds a new task to the TASKS_DATA table
     public void addNewTask(TaskModel taskModel) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put(COLUMN_TEXT, taskModel.getText());
         cv.put(COLUMN_STATUS, taskModel.getStatus());
+        cv.put(COLUMN_POSITION, taskModel.getPosition());
         db.insert(TASKS_DATA, null, cv);
         db.close();
     }
 
+    // Retrieves all the tasks from the TASKS_DATA table
     public List<TaskModel> getAllTasks() {
         SQLiteDatabase db = this.getReadableDatabase();
         List<TaskModel> allTasks = new ArrayList<>();
@@ -70,10 +78,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         catch (Exception ex) {
             System.out.println("Database Error");
         }
-
         return allTasks;
     }
 
+    // Updates the completion status of a task
     public void updateStatus(int id, int status) {
         SQLiteDatabase db = this.getReadableDatabase();
         ContentValues cv = new ContentValues();
@@ -82,6 +90,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
     }
 
+    // Updates the text of the task
     public void updateTask(int id, String text) {
         SQLiteDatabase db = this.getReadableDatabase();
         ContentValues cv = new ContentValues();
@@ -90,6 +99,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
     }
 
+    // Updates the position of the task
     public void updatePosition(int id, int toPosition) {
         SQLiteDatabase db = this.getReadableDatabase();
         ContentValues cv = new ContentValues();
@@ -98,13 +108,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
     }
 
+    // Deletes a task with an ID
     public void deleteTask(int id) {
         SQLiteDatabase db = this.getReadableDatabase();
         db.delete(TASKS_DATA, COLUMN_ID + "=?", new String[] {String.valueOf(id)});
         db.close();
     }
 
-    public void clearDatabase() {
+    // Clears the TASKS_DATA table
+    private void clearDatabase() {
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(TASKS_DATA, null, null);
         db.close();

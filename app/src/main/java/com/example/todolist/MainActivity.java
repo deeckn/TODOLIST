@@ -23,12 +23,12 @@ import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
 
-    DatabaseHelper db;
-    FloatingActionButton actionButton;
-    RecyclerView taskRecyclerView;
-    TaskCardAdapter adapter;
-    List<TaskModel> tasks;
-    int COUNT;
+    private DatabaseHelper db;
+    private FloatingActionButton actionButton;
+    private RecyclerView taskRecyclerView;
+    private TaskCardAdapter adapter;
+    private List<TaskModel> tasks;
+    private int orderCount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,11 +61,13 @@ public class MainActivity extends AppCompatActivity {
         Collections.sort(tasks);
         adapter = new TaskCardAdapter(tasks, this);
         taskRecyclerView.setAdapter(adapter);
-        COUNT = tasks.size();
+        orderCount = tasks.size();
     }
 
+    /*** Adding a new task: OnClickListener method for the floating action button ***/
     @SuppressLint("NotifyDataSetChanged")
     private final View.OnClickListener openBottomSheet = v -> {
+        // Initialize BottomSheetDialog Object and Inflate View
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(
                 MainActivity.this, R.style.BottomSheetDialogTheme
         );
@@ -77,19 +79,22 @@ public class MainActivity extends AppCompatActivity {
         bottomSheetDialog.setContentView(bottomSheetView);
         bottomSheetDialog.show();
 
+        // Gets the EditText and Button from the layout xml file
         EditText input = bottomSheetDialog.findViewById(R.id.input_task);
         Button confirmButton = bottomSheetView.findViewById(R.id.confirm_button);
 
+        // Attach an onClickListener to the button
         confirmButton.setOnClickListener(v1 -> {
             try {
                 assert input != null;
                 String text = input.getText().toString();
                 if (!text.equals("")) {
-                    db.addNewTask(new TaskModel(0, text, 0, ++COUNT));
+                    db.addNewTask(new TaskModel(0, text, 0, ++orderCount));
                     tasks = db.getAllTasks();
                     adapter.setTaskList(tasks);
                     adapter.notifyDataSetChanged();
                     bottomSheetDialog.cancel();
+                    Toast.makeText(this, "Task Added", Toast.LENGTH_SHORT).show();
                 }
                 else {
                     Toast.makeText(this, "Field cannot be empty", Toast.LENGTH_SHORT).show();
@@ -100,6 +105,7 @@ public class MainActivity extends AppCompatActivity {
         });
     };
 
+    /*** Callback for swiping and dragging recyclerview task cards ***/
     ItemTouchHelper.SimpleCallback cardBehavior = new ItemTouchHelper.SimpleCallback(
             ItemTouchHelper.UP | ItemTouchHelper.DOWN |
                     ItemTouchHelper.START | ItemTouchHelper.END,
@@ -110,18 +116,20 @@ public class MainActivity extends AppCompatActivity {
         public boolean onMove(@NonNull RecyclerView recyclerView,
                               @NonNull RecyclerView.ViewHolder viewHolder,
                               @NonNull RecyclerView.ViewHolder target) {
+
+            // Moving adapter and array position
             int fromPosition = viewHolder.getAdapterPosition();
             int toPosition = target.getAdapterPosition();
             Collections.swap(tasks, fromPosition, toPosition);
             Objects.requireNonNull(recyclerView.getAdapter()).notifyItemMoved(fromPosition, toPosition);
 
+            // Update all current positions of the tasks
             int i = 0;
             for (TaskModel task : tasks) {
                 task.setPosition(i);
                 db.updatePosition(task.getId(), i);
                 i++;
             }
-
             return false;
         }
 
@@ -133,6 +141,7 @@ public class MainActivity extends AppCompatActivity {
                 tasks.remove(position);
                 db.deleteTask(id);
                 adapter.notifyItemRemoved(position);
+                Toast.makeText(MainActivity.this, "Task Removed", Toast.LENGTH_SHORT).show();
             }
             else {
                 showUpdateItemDialog(id, position);
@@ -141,10 +150,13 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    /*** Opens the BottomSheetDialog to allow the user to update a task ***/
     @SuppressLint("SetTextI18n")
     private void showUpdateItemDialog(int id, int position) {
+        // Current task
         TaskModel currentModel = adapter.getModel(position);
 
+        // Initialize Dialog for editing task
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(
                 MainActivity.this, R.style.BottomSheetDialogTheme
         );
@@ -153,16 +165,17 @@ public class MainActivity extends AppCompatActivity {
                         R.layout.new_task,
                         findViewById(R.id.bottomSheetContainer)
                 );
-
         bottomSheetDialog.setContentView(bottomSheetView);
         bottomSheetDialog.show();
 
+        // Connecting EditText and Button from XML file
         EditText input = bottomSheetDialog.findViewById(R.id.input_task);
         Button confirmButton = bottomSheetView.findViewById(R.id.confirm_button);
         confirmButton.setText("Update");
         assert input != null;
         input.setText(currentModel.getText());
 
+        // Attach onClickListener to confirm button to update task in SQLite
         confirmButton.setOnClickListener(v1 -> {
             try {
                 String text = input.getText().toString();
