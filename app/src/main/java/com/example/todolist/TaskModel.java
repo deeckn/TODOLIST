@@ -2,7 +2,7 @@ package com.example.todolist;
 
 public class TaskModel implements Comparable<TaskModel> {
     private final int id, status;
-    private final String text;
+    private String text;
 
     public TaskModel(int id, String text, int status) {
         this.id = id;
@@ -20,6 +20,10 @@ public class TaskModel implements Comparable<TaskModel> {
 
     public int getStatus() {
         return status;
+    }
+
+    public void setText(String text) {
+        this.text = text;
     }
 
     @Override
