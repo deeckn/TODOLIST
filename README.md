@@ -1,4 +1,4 @@
-# todo-list-app
+# TODOLIST APP
 A simple TODO list android application using Java and SQLite
 
 ## Adding a New Task
