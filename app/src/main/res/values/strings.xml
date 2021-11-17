@@ -8,4 +8,5 @@
     <string name="new_task">New Task</string>
     <string name="save">Save</string>
     <string name="add">Add</string>
+    <string name="swipe_left_to_delete_swipe_right_to_edit">Swipe Left to Delete | Swipe Right to Edit</string>
 </resources>
