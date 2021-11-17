@@ -124,15 +124,11 @@ public class MainActivity extends AppCompatActivity {
             Objects.requireNonNull(recyclerView.getAdapter()).notifyItemMoved(fromPosition, toPosition);
 
             // Update all current positions of the tasks
-            int i = 0;
-            for (TaskModel task : tasks) {
-                task.setPosition(i);
-                db.updatePosition(task.getId(), i);
-                i++;
-            }
+            updatePosition();
             return false;
         }
 
+        @SuppressLint("NotifyDataSetChanged")
         @Override
         public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
             int position = viewHolder.getAdapterPosition();
@@ -140,7 +136,9 @@ public class MainActivity extends AppCompatActivity {
             if (direction == ItemTouchHelper.LEFT) {
                 tasks.remove(position);
                 db.deleteTask(id);
-                adapter.notifyItemRemoved(position);
+                updatePosition();
+                adapter.setTaskList(db.getAllTasks());
+                adapter.notifyDataSetChanged();
                 orderCount--;
                 Toast.makeText(MainActivity.this, "Task Removed", Toast.LENGTH_SHORT).show();
             }
@@ -194,5 +192,14 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         });
+    }
+
+    private void updatePosition() {
+        int i = 0;
+        for (TaskModel task : tasks) {
+            task.setPosition(i);
+            db.updatePosition(task.getId(), i);
+            i++;
+        }
     }
 }
