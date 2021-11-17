@@ -141,6 +141,7 @@ public class MainActivity extends AppCompatActivity {
                 tasks.remove(position);
                 db.deleteTask(id);
                 adapter.notifyItemRemoved(position);
+                orderCount--;
                 Toast.makeText(MainActivity.this, "Task Removed", Toast.LENGTH_SHORT).show();
             }
             else {
