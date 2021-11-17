@@ -55,9 +55,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void fillRecyclerView() {
         tasks = db.getAllTasks();
-        for (TaskModel t : tasks) {
-            System.out.println(t.getText() + " " + t.getPosition());
-        }
         Collections.sort(tasks);
         adapter = new TaskCardAdapter(tasks, this);
         taskRecyclerView.setAdapter(adapter);

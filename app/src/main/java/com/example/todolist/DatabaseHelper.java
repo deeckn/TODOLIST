@@ -67,7 +67,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     String text = cursor.getString(1);
                     int status = cursor.getInt(2);
                     int position = cursor.getInt(3);
-                    System.out.println("POSITION FROM DATABASE = " + position);
                     TaskModel task = new TaskModel(id, text, status, position);
                     allTasks.add(task);
                 } while (cursor.moveToNext());
